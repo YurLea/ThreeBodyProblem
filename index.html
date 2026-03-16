@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Задача трёх тел</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<canvas id="simCanvas"></canvas>
+
+<aside class="panel">
+    <h1>Задача трёх тел</h1>
+    <p class="hint">
+        Выбери тело 1/2/3 ниже, затем ЛКМ: кликни в новую точку, потяни мышь и отпусти —
+        так задаются положение и начальная скорость выбранного тела.
+        Координаты и скорости также можно менять вручную в полях ниже.
+    </p>
+
+    <div class="field">
+        <label for="gInput">G</label>
+        <input id="gInput" type="number" min="0.0001" step="0.1" value="1" />
+    </div>
+
+    <div class="field">
+        <label for="dtInput">Шаг dt</label>
+        <input id="dtInput" type="number" min="0.0001" step="0.0001" value="0.002" />
+    </div>
+
+    <div class="field">
+        <label for="timeScaleInput">Скорость времени</label>
+        <input id="timeScaleInput" type="number" min="0.1" step="0.1" value="1" />
+    </div>
+
+    <div class="field">
+        <label for="scaleInput">Масштаб</label>
+        <input id="scaleInput" type="number" min="10" step="10" value="160" />
+    </div>
+
+    <div class="field">
+        <label for="launchScaleInput">Масштаб стартовой скорости</label>
+        <input id="launchScaleInput" type="number" min="0.1" step="0.1" value="1.2" />
+    </div>
+
+    <div class="field">
+        <label for="vectorScaleInput">Масштаб вектора скорости</label>
+        <input id="vectorScaleInput" type="number" min="0.05" step="0.05" value="0.35" />
+    </div>
+
+    <div class="field">
+        <label for="trailLengthInput">Длина трека</label>
+        <input id="trailLengthInput" type="number" min="20" step="20" value="400" />
+    </div>
+
+    <label class="checkbox">
+        <input id="showTrailsInput" type="checkbox" checked />
+        Показывать треки
+    </label>
+
+    <label class="checkbox">
+        <input id="showVectorsInput" type="checkbox" />
+        Показывать векторы скорости
+    </label>
+
+    <label class="checkbox">
+        <input id="centerOnMassInput" type="checkbox" checked />
+        Центрировать по центру масс
+    </label>
+
+    <div class="selector">
+        <div class="selector-title">Тело для drag-редактирования</div>
+        <div class="selector-buttons">
+            <button id="selectBody0" type="button" class="secondary active">Тело 1</button>
+            <button id="selectBody1" type="button" class="secondary">Тело 2</button>
+            <button id="selectBody2" type="button" class="secondary">Тело 3</button>
+        </div>
+    </div>
+
+    <section class="body-card body-card-0">
+        <h3>Тело 1</h3>
+
+        <div class="field">
+            <label for="m1Input">m₁</label>
+            <input id="m1Input" type="number" min="0.0001" step="0.1" value="1" />
+        </div>
+        <div class="field">
+            <label for="x1Input">x₁</label>
+            <input id="x1Input" type="number" step="0.01" value="-0.97000436" />
+        </div>
+        <div class="field">
+            <label for="y1Input">y₁</label>
+            <input id="y1Input" type="number" step="0.01" value="0.24308753" />
+        </div>
+        <div class="field">
+            <label for="vx1Input">vₓ₁</label>
+            <input id="vx1Input" type="number" step="0.01" value="0.466203685" />
+        </div>
+        <div class="field">
+            <label for="vy1Input">vᵧ₁</label>
+            <input id="vy1Input" type="number" step="0.01" value="0.43236573" />
+        </div>
+    </section>
+
+    <section class="body-card body-card-1">
+        <h3>Тело 2</h3>
+
+        <div class="field">
+            <label for="m2Input">m₂</label>
+            <input id="m2Input" type="number" min="0.0001" step="0.1" value="1" />
+        </div>
+        <div class="field">
+            <label for="x2Input">x₂</label>
+            <input id="x2Input" type="number" step="0.01" value="0.97000436" />
+        </div>
+        <div class="field">
+            <label for="y2Input">y₂</label>
+            <input id="y2Input" type="number" step="0.01" value="-0.24308753" />
+        </div>
+        <div class="field">
+            <label for="vx2Input">vₓ₂</label>
+            <input id="vx2Input" type="number" step="0.01" value="0.466203685" />
+        </div>
+        <div class="field">
+            <label for="vy2Input">vᵧ₂</label>
+            <input id="vy2Input" type="number" step="0.01" value="0.43236573" />
+        </div>
+    </section>
+
+    <section class="body-card body-card-2">
+        <h3>Тело 3</h3>
+
+        <div class="field">
+            <label for="m3Input">m₃</label>
+            <input id="m3Input" type="number" min="0.0001" step="0.1" value="1" />
+        </div>
+        <div class="field">
+            <label for="x3Input">x₃</label>
+            <input id="x3Input" type="number" step="0.01" value="0" />
+        </div>
+        <div class="field">
+            <label for="y3Input">y₃</label>
+            <input id="y3Input" type="number" step="0.01" value="0" />
+        </div>
+        <div class="field">
+            <label for="vx3Input">vₓ₃</label>
+            <input id="vx3Input" type="number" step="0.01" value="-0.93240737" />
+        </div>
+        <div class="field">
+            <label for="vy3Input">vᵧ₃</label>
+            <input id="vy3Input" type="number" step="0.01" value="-0.86473146" />
+        </div>
+    </section>
+
+    <div class="buttons">
+        <button id="pauseBtn" type="button">Пауза</button>
+        <button id="applyBtn" type="button">Применить и перезапустить</button>
+        <button id="resetBtn" type="button">Перезапустить</button>
+        <button id="presetBtn" type="button">Сбросить пример</button>
+        <button id="helpBtn" type="button">Справка</button>
+    </div>
+
+    <div id="stats" class="stats"></div>
+</aside>
+
+<div id="helpOverlay" class="modal-overlay hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+        <button id="helpCloseBtn" class="modal-close" type="button" aria-label="Закрыть">×</button>
+
+        <h2 id="helpTitle">Справка</h2>
+
+        <div class="modal-content">
+            <h3>Постановка задачи</h3>
+            <p>
+                Эта симуляция показывает классическую задачу трёх тел:
+                три материальные точки притягивают друг друга по закону всемирного тяготения.
+                В отличие от задачи притягивающего центра, здесь все три тела движутся
+                и все три влияют друг на друга.
+            </p>
+
+            <h3>Уравнения движения</h3>
+            <p class="formula">
+                r¨<sub>i</sub> = G &Sigma;<sub>j&ne;i</sub> m<sub>j</sub>
+                (r<sub>j</sub> - r<sub>i</sub>) / |r<sub>j</sub> - r<sub>i</sub>|<sup>3</sup>
+            </p>
+
+            <p>Здесь:</p>
+            <ul>
+                <li><b>r<sub>i</sub> = (x<sub>i</sub>, y<sub>i</sub>)</b> — радиус-вектор i-го тела,</li>
+                <li><b>m<sub>i</sub></b> — масса i-го тела,</li>
+                <li><b>G</b> — гравитационная постоянная в выбранных модельных единицах.</li>
+            </ul>
+
+            <h3>Как пользоваться</h3>
+            <ul>
+                <li>На экране всегда присутствуют ровно 3 тела.</li>
+                <li>Можно редактировать их массы, координаты и скорости в панели.</li>
+                <li>После изменения параметров нажми <b>«Применить и перезапустить»</b>.</li>
+                <li>
+                    Чтобы задать положение и начальную скорость мышкой:
+                    выбери тело 1/2/3, кликни на поле, потяни мышь и отпусти.
+                </li>
+            </ul>
+
+            <h3>Численный метод</h3>
+            <p>
+                Для интегрирования используется метод <b>Velocity Verlet</b>.
+                Он хорошо подходит для гравитационных задач и обычно работает устойчивее,
+                чем простой метод Эйлера.
+            </p>
+            <p>
+                Параметр <b>dt</b> — шаг интегрирования: чем он меньше, тем выше точность,
+                но тем больше вычислительная нагрузка.
+            </p>
+
+            <h3>Замечания</h3>
+            <ul>
+                <li>По умолчанию загружается красивый пример «восьмёрки» трёх тел.</li>
+                <li>
+                    Если система ведёт себя слишком резко или «взрывается» численно,
+                    уменьши <b>dt</b>.
+                </li>
+                <li>
+                    Галочка <b>«Центрировать по центру масс»</b> помогает держать систему в кадре.
+                </li>
+            </ul>
+        </div>
+
+        <div class="modal-actions">
+            <button id="helpOkBtn" type="button">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<script src="./main.js" defer></script>
+</body>
+</html>
