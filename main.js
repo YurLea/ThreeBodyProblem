@@ -11,7 +11,7 @@ const ui = {
     trailLengthInput: document.getElementById('trailLengthInput'),
     showTrailsInput: document.getElementById('showTrailsInput'),
     showVectorsInput: document.getElementById('showVectorsInput'),
-    centerOnMassInput: document.getElementById('centerOnMassInput'),
+    cameraModeInput: document.getElementById('cameraModeInput'),
 
     selectBody0: document.getElementById('selectBody0'),
     selectBody1: document.getElementById('selectBody1'),
@@ -21,11 +21,17 @@ const ui = {
     applyBtn: document.getElementById('applyBtn'),
     resetBtn: document.getElementById('resetBtn'),
     presetBtn: document.getElementById('presetBtn'),
+    orbitsBtn: document.getElementById('orbitsBtn'),
     helpBtn: document.getElementById('helpBtn'),
 
     helpOverlay: document.getElementById('helpOverlay'),
     helpCloseBtn: document.getElementById('helpCloseBtn'),
     helpOkBtn: document.getElementById('helpOkBtn'),
+
+    orbitsOverlay: document.getElementById('orbitsOverlay'),
+    orbitsCloseBtn: document.getElementById('orbitsCloseBtn'),
+    orbitsOkBtn: document.getElementById('orbitsOkBtn'),
+    orbitList: document.getElementById('orbitList'),
 
     stats: document.getElementById('stats')
 };
@@ -74,7 +80,7 @@ const state = {
     showVectors: false,
     trailMaxLength: 400,
     trailSampleEvery: 1,
-    centerOnMass: true,
+    cameraMode: 'com',
     softening: 0.001,
     paused: false
 };
@@ -85,6 +91,131 @@ const PRESET_FIGURE_EIGHT = [
     { mass: 1, x: -0.97000436, y: 0.24308753, vx: 0.4662036850, vy: 0.4323657300 },
     { mass: 1, x: 0.97000436, y: -0.24308753, vx: 0.4662036850, vy: 0.4323657300 },
     { mass: 1, x: 0, y: 0, vx: -0.93240737, vy: -0.86473146 }
+];
+
+function rotatePoint(x, y, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    return {
+        x: c * x - s * y,
+        y: s * x + c * y
+    };
+}
+
+function transformBodiesForScaleAndRotation(bodies, { scale = 1, rotation = 0 }) {
+    const velocityScale = 1 / Math.sqrt(scale);
+
+    return bodies.map(body => {
+        const p = rotatePoint(body.x * scale, body.y * scale, rotation);
+        const v = rotatePoint(body.vx * velocityScale, body.vy * velocityScale, rotation);
+
+        return {
+            mass: body.mass,
+            x: p.x,
+            y: p.y,
+            vx: v.x,
+            vy: v.y
+        };
+    });
+}
+
+function buildLagrangeTrianglePreset({ side = 2, mass = 1, clockwise = false }) {
+    const R = side / Math.sqrt(3);
+    const v = Math.sqrt(mass / side); // G = 1 в пресете
+
+    const bodies = [
+        { mass, x: R, y: 0, vx: 0, vy: v },
+        { mass, x: -R / 2, y: side / 2, vx: -Math.sqrt(3) * v / 2, vy: -v / 2 },
+        { mass, x: -R / 2, y: -side / 2, vx: Math.sqrt(3) * v / 2, vy: -v / 2 }
+    ];
+
+    if (!clockwise) {
+        return bodies;
+    }
+
+    return bodies.map(body => ({
+        ...body,
+        vx: -body.vx,
+        vy: -body.vy
+    }));
+}
+
+function buildEulerCollinearPreset({ r = 1, mass = 1, clockwise = false }) {
+    const omega = Math.sqrt(5 * mass / (4 * Math.pow(r, 3))); // G = 1
+    const v = omega * r;
+
+    const bodies = [
+        { mass, x: -r, y: 0, vx: 0, vy: v },
+        { mass, x: 0, y: 0, vx: 0, vy: 0 },
+        { mass, x: r, y: 0, vx: 0, vy: -v }
+    ];
+
+    if (!clockwise) {
+        return bodies;
+    }
+
+    return bodies.map(body => ({
+        ...body,
+        vx: -body.vx,
+        vy: -body.vy
+    }));
+}
+
+const ORBIT_PRESETS = [
+    {
+        id: 'figure-eight',
+        name: 'Восьмёрка',
+        description: 'Классическая хореография трёх одинаковых тел: все три движутся по одной и той же кривой в форме восьмёрки.',
+        meta: '3 одинаковые массы, G = 1',
+        settings: { G: 1, dt: 0.002, scale: 160 },
+        bodies: PRESET_FIGURE_EIGHT
+    },
+    {
+        id: 'figure-eight-rotated',
+        name: 'Восьмёрка (повёрнутая)',
+        description: 'Та же самая периодическая орбита, но повернутая на 90°.',
+        meta: 'Поворот базовой восьмёрки',
+        settings: { G: 1, dt: 0.002, scale: 160 },
+        bodies: transformBodiesForScaleAndRotation(PRESET_FIGURE_EIGHT, {
+            scale: 1,
+            rotation: Math.PI / 2
+        })
+    },
+    {
+        id: 'figure-eight-large',
+        name: 'Восьмёрка (увеличенная)',
+        description: 'Масштабная версия восьмёрки. Орбита остаётся периодической, но становится больше и медленнее.',
+        meta: 'Масштаб λ = 1.8',
+        settings: { G: 1, dt: 0.003, scale: 105 },
+        bodies: transformBodiesForScaleAndRotation(PRESET_FIGURE_EIGHT, {
+            scale: 1.8,
+            rotation: 0
+        })
+    },
+    {
+        id: 'lagrange-triangle',
+        name: 'Лагранж: равносторонний треугольник',
+        description: 'Три одинаковые массы находятся в вершинах равностороннего треугольника и равномерно вращаются как жёсткая конфигурация.',
+        meta: 'Центральная конфигурация Лагранжа',
+        settings: { G: 1, dt: 0.002, scale: 140 },
+        bodies: buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false })
+    },
+    {
+        id: 'lagrange-triangle-large',
+        name: 'Лагранж (больший масштаб)',
+        description: 'Та же треугольная периодическая конфигурация, но в увеличенном масштабе.',
+        meta: 'Масштабированный вариант',
+        settings: { G: 1, dt: 0.003, scale: 100 },
+        bodies: buildLagrangeTrianglePreset({ side: 3.2, mass: 1, clockwise: false })
+    },
+    {
+        id: 'euler-collinear',
+        name: 'Эйлер: коллинеарная орбита',
+        description: 'Тела лежат на одной прямой и периодически вращаются, сохраняя коллинеарность относительно центра масс.',
+        meta: 'Коллинеарная центральная конфигурация',
+        settings: { G: 1, dt: 0.001, scale: 180 },
+        bodies: buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false })
+    }
 ];
 
 const drag = {
@@ -146,9 +277,47 @@ function createInitialBodyConfig(raw, index) {
 }
 
 function loadPresetFigureEight() {
+    ui.gInput.value = 1;
+    ui.dtInput.value = 0.002;
+    ui.scaleInput.value = 160;
+
     initialBodies = PRESET_FIGURE_EIGHT.map((body, index) => createInitialBodyConfig(body, index));
     writeBodyInputsFromInitial();
+    applyGlobalSettings();
     resetSimulation();
+}
+
+function loadOrbitPreset(preset) {
+    ui.gInput.value = preset.settings.G;
+    ui.dtInput.value = preset.settings.dt;
+    ui.scaleInput.value = preset.settings.scale;
+
+    initialBodies = preset.bodies.map((body, index) => createInitialBodyConfig(body, index));
+    writeBodyInputsFromInitial();
+    applyGlobalSettings();
+    resetSimulation();
+    closeOrbitsModal();
+}
+
+function renderOrbitPresets() {
+    ui.orbitList.innerHTML = '';
+
+    ORBIT_PRESETS.forEach(preset => {
+        const card = document.createElement('div');
+        card.className = 'orbit-card';
+
+        card.innerHTML = `
+            <h3>${preset.name}</h3>
+            <p>${preset.description}</p>
+            <div class="orbit-meta">${preset.meta}</div>
+            <button type="button">Загрузить</button>
+        `;
+
+        const btn = card.querySelector('button');
+        btn.addEventListener('click', () => loadOrbitPreset(preset));
+
+        ui.orbitList.appendChild(card);
+    });
 }
 
 function writeBodyInputsFromInitial() {
@@ -256,7 +425,7 @@ function applyGlobalSettings() {
     state.trailMaxLength = Math.floor(readNumber(ui.trailLengthInput, 400, 20, 4000));
     state.showTrails = ui.showTrailsInput.checked;
     state.showVectors = ui.showVectorsInput.checked;
-    state.centerOnMass = ui.centerOnMassInput.checked;
+    state.cameraMode = ui.cameraModeInput.value;
 
     trimTrails();
     recomputeAccelerationsCurrent();
@@ -285,8 +454,24 @@ function setSelectedBody(index) {
 }
 
 function getCameraCenter(sourceBodies = (bodies.length ? bodies : initialBodies)) {
-    if (!state.centerOnMass || !sourceBodies.length) {
+    if (!sourceBodies.length) {
         return { x: 0, y: 0 };
+    }
+
+    if (state.cameraMode === 'origin') {
+        return { x: 0, y: 0 };
+    }
+
+    if (state.cameraMode === 'body0' && sourceBodies[0]) {
+        return { x: sourceBodies[0].x, y: sourceBodies[0].y };
+    }
+
+    if (state.cameraMode === 'body1' && sourceBodies[1]) {
+        return { x: sourceBodies[1].x, y: sourceBodies[1].y };
+    }
+
+    if (state.cameraMode === 'body2' && sourceBodies[2]) {
+        return { x: sourceBodies[2].x, y: sourceBodies[2].y };
     }
 
     let totalMass = 0;
@@ -728,10 +913,19 @@ function closeHelpModal() {
     ui.helpOverlay.classList.add('hidden');
 }
 
+function openOrbitsModal() {
+    ui.orbitsOverlay.classList.remove('hidden');
+}
+
+function closeOrbitsModal() {
+    ui.orbitsOverlay.classList.add('hidden');
+}
+
 function init() {
     resizeCanvas();
     setSelectedBody(0);
     loadPresetFigureEight();
+    renderOrbitPresets();
     applyGlobalSettings();
     setPauseButtonText();
     render();
@@ -751,7 +945,7 @@ function init() {
         ui.trailLengthInput,
         ui.showTrailsInput,
         ui.showVectorsInput,
-        ui.centerOnMassInput
+        ui.cameraModeInput
     ].forEach(input => {
         input.addEventListener('input', applyGlobalSettings);
         input.addEventListener('change', applyGlobalSettings);
@@ -772,7 +966,10 @@ function init() {
     ui.pauseBtn.addEventListener('click', togglePause);
     ui.applyBtn.addEventListener('click', applyBodiesAndReset);
     ui.resetBtn.addEventListener('click', resetSimulation);
+    ui.orbitsBtn.addEventListener('click', openOrbitsModal);
     ui.presetBtn.addEventListener('click', loadPresetFigureEight);
+
+
 
     canvas.addEventListener('pointerdown', startDrag);
     canvas.addEventListener('pointermove', moveDrag);
@@ -789,15 +986,30 @@ function init() {
         }
     });
 
+    ui.orbitsCloseBtn.addEventListener('click', closeOrbitsModal);
+    ui.orbitsOkBtn.addEventListener('click', closeOrbitsModal);
+
+    ui.orbitsOverlay.addEventListener('click', event => {
+        if (event.target === ui.orbitsOverlay) {
+            closeOrbitsModal();
+        }
+    });
+
     window.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && !ui.helpOverlay.classList.contains('hidden')) {
-            closeHelpModal();
+        if (event.key === 'Escape') {
+            if (!ui.helpOverlay.classList.contains('hidden')) {
+                closeHelpModal();
+            }
+            if (!ui.orbitsOverlay.classList.contains('hidden')) {
+                closeOrbitsModal();
+            }
         }
 
         if (
             event.code === 'Space' &&
             event.target.tagName !== 'INPUT' &&
-            event.target.tagName !== 'BUTTON'
+            event.target.tagName !== 'BUTTON' &&
+            event.target.tagName !== 'SELECT'
         ) {
             event.preventDefault();
             togglePause();
