@@ -81,7 +81,7 @@ const state = {
     trailMaxLength: 400,
     trailSampleEvery: 1,
     cameraMode: 'com',
-    softening: 0.001,
+    softening: 0.0000001,
     paused: false
 };
 
@@ -215,6 +215,79 @@ const ORBIT_PRESETS = [
         meta: 'Коллинеарная центральная конфигурация',
         settings: { G: 1, dt: 0.001, scale: 180 },
         bodies: buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false })
+    },
+
+    {
+        id: 'butterfly-i',
+        name: 'Butterfly I',
+        description: 'Периодическая хореография трёх одинаковых тел из семейства Butterfly.',
+        meta: 'Šuvakov–Dmitrašinović, 2013',
+        settings: { G: 1, dt: 0.0005, scale: 220, trailLength: 1200 },
+        bodies: buildSuvakovOrbit({ vx: 0.30689, vy: 0.12551 })
+    },
+    {
+        id: 'butterfly-ii',
+        name: 'Butterfly II',
+        description: 'Вторая периодическая орбита из семейства Butterfly.',
+        meta: 'Šuvakov–Dmitrašinović, 2013',
+        settings: { G: 1, dt: 0.0005, scale: 200, trailLength: 1200 },
+        bodies: buildSuvakovOrbit({ vx: 0.39295, vy: 0.09758 })
+    },
+    {
+        id: 'moth-i',
+        name: 'Moth I',
+        description: 'Периодическая хореография из семейства Moth.',
+        meta: 'Šuvakov–Dmitrašinović, 2013',
+        settings: { G: 1, dt: 0.0005, scale: 180, trailLength: 1200 },
+        bodies: buildSuvakovOrbit({ vx: 0.46444, vy: 0.39606 })
+    },
+    {
+        id: 'moth-ii',
+        name: 'Moth II',
+        description: 'Вторая периодическая орбита из семейства Moth.',
+        meta: 'Šuvakov–Dmitrašinović, 2013',
+        settings: { G: 1, dt: 0.0005, scale: 170, trailLength: 1500 },
+        bodies: buildSuvakovOrbit({ vx: 0.43917, vy: 0.45297 })
+    },
+    {
+        id: 'dragonfly',
+        name: 'Dragonfly',
+        description: 'Очень красивая и сложная периодическая хореография.',
+        meta: 'Šuvakov–Dmitrašinović, 2013',
+        settings: { G: 1, dt: 0.0005, scale: 200, trailLength: 1500 },
+        bodies: buildSuvakovOrbit({ vx: 0.08058, vy: 0.58884 })
+    },
+    {
+        id: 'goggles',
+        name: 'Goggles',
+        description: 'Периодическая орбита в форме очков.',
+        meta: 'Šuvakov–Dmitrašinović, 2013',
+        settings: { G: 1, dt: 0.0005, scale: 240, trailLength: 1200 },
+        bodies: buildSuvakovOrbit({ vx: 0.08330, vy: 0.12789 })
+    },
+    {
+        id: 'bumblebee',
+        name: 'Bumblebee',
+        description: 'Очень длинная и сложная периодическая орбита.',
+        meta: 'Šuvakov–Dmitrašinović, 2013',
+        settings: { G: 1, dt: 0.0005, scale: 140, trailLength: 2500 },
+        bodies: buildSuvakovOrbit({ vx: 0.18428, vy: 0.58719 })
+    },
+    {
+        id: 'yarn',
+        name: 'Yarn',
+        description: 'Сложная запутанная периодическая орбита.',
+        meta: 'Šuvakov–Dmitrašinović, 2013',
+        settings: { G: 1, dt: 0.0005, scale: 160, trailLength: 2500 },
+        bodies: buildSuvakovOrbit({ vx: 0.55906, vy: 0.34919 })
+    },
+    {
+        id: 'yin-yang-i',
+        name: 'Yin-Yang I',
+        description: 'Периодическая орбита из семейства Yin-Yang.',
+        meta: 'Šuvakov–Dmitrašinović, 2013',
+        settings: { G: 1, dt: 0.0005, scale: 180, trailLength: 1500 },
+        bodies: buildSuvakovOrbit({ vx: 0.51394, vy: 0.30474 })
     }
 ];
 
@@ -919,6 +992,14 @@ function openOrbitsModal() {
 
 function closeOrbitsModal() {
     ui.orbitsOverlay.classList.add('hidden');
+}
+
+function buildSuvakovOrbit({ vx, vy, mass = 1 }) {
+    return [
+        { mass, x:  1, y: 0, vx: vx, vy: vy },
+        { mass, x: -1, y: 0, vx: vx, vy: vy },
+        { mass, x:  0, y: 0, vx: -2 * vx, vy: -2 * vy }
+    ];
 }
 
 function init() {
