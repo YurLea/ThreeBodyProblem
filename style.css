@@ -342,3 +342,19 @@ button.secondary.active {
 .orbit-card button:hover {
     background: #4475ff;
 }
+
+.orbit-group {
+    margin-bottom: 18px;
+}
+
+.orbit-group-title {
+    margin: 18px 0 10px;
+    font-size: 18px;
+    color: #ffffff;
+}
+
+.orbit-source {
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #9fb3e6;
+}

@@ -1,5 +1,5 @@
 const canvas = document.getElementById('simCanvas');
-const ctx = canvas.getContext('2d', { alpha: false });
+const ctx = canvas.getContext('2d', {alpha: false});
 
 const ui = {
     gInput: document.getElementById('gInput'),
@@ -60,7 +60,7 @@ const bodyInputs = [
     }
 ];
 
-const bodyInputElements = bodyInputs.flatMap(({ m, x, y, vx, vy }) => [m, x, y, vx, vy]);
+const bodyInputElements = bodyInputs.flatMap(({m, x, y, vx, vy}) => [m, x, y, vx, vy]);
 const selectButtons = [ui.selectBody0, ui.selectBody1, ui.selectBody2];
 
 const viewport = {
@@ -87,46 +87,20 @@ const state = {
 
 const BODY_COLORS = ['#ff6b6b', '#ffd166', '#4cc9f0'];
 
-const PRESET_FIGURE_EIGHT = [
-    { mass: 1, x: -0.97000436, y: 0.24308753, vx: 0.4662036850, vy: 0.4323657300 },
-    { mass: 1, x: 0.97000436, y: -0.24308753, vx: 0.4662036850, vy: 0.4323657300 },
-    { mass: 1, x: 0, y: 0, vx: -0.93240737, vy: -0.86473146 }
-];
+const orbitPresets = window.ORBIT_PRESETS || [];
 
-function rotatePoint(x, y, angle) {
-    const c = Math.cos(angle);
-    const s = Math.sin(angle);
-    return {
-        x: c * x - s * y,
-        y: s * x + c * y
-    };
+function getOrbitPresetById(id) {
+    return orbitPresets.find(preset => preset.id === id) || null;
 }
 
-function transformBodiesForScaleAndRotation(bodies, { scale = 1, rotation = 0 }) {
-    const velocityScale = 1 / Math.sqrt(scale);
-
-    return bodies.map(body => {
-        const p = rotatePoint(body.x * scale, body.y * scale, rotation);
-        const v = rotatePoint(body.vx * velocityScale, body.vy * velocityScale, rotation);
-
-        return {
-            mass: body.mass,
-            x: p.x,
-            y: p.y,
-            vx: v.x,
-            vy: v.y
-        };
-    });
-}
-
-function buildLagrangeTrianglePreset({ side = 2, mass = 1, clockwise = false }) {
+function buildLagrangeTrianglePreset({side = 2, mass = 1, clockwise = false}) {
     const R = side / Math.sqrt(3);
     const v = Math.sqrt(mass / side); // G = 1 в пресете
 
     const bodies = [
-        { mass, x: R, y: 0, vx: 0, vy: v },
-        { mass, x: -R / 2, y: side / 2, vx: -Math.sqrt(3) * v / 2, vy: -v / 2 },
-        { mass, x: -R / 2, y: -side / 2, vx: Math.sqrt(3) * v / 2, vy: -v / 2 }
+        {mass, x: R, y: 0, vx: 0, vy: v},
+        {mass, x: -R / 2, y: side / 2, vx: -Math.sqrt(3) * v / 2, vy: -v / 2},
+        {mass, x: -R / 2, y: -side / 2, vx: Math.sqrt(3) * v / 2, vy: -v / 2}
     ];
 
     if (!clockwise) {
@@ -140,14 +114,14 @@ function buildLagrangeTrianglePreset({ side = 2, mass = 1, clockwise = false }) 
     }));
 }
 
-function buildEulerCollinearPreset({ r = 1, mass = 1, clockwise = false }) {
+function buildEulerCollinearPreset({r = 1, mass = 1, clockwise = false}) {
     const omega = Math.sqrt(5 * mass / (4 * Math.pow(r, 3))); // G = 1
     const v = omega * r;
 
     const bodies = [
-        { mass, x: -r, y: 0, vx: 0, vy: v },
-        { mass, x: 0, y: 0, vx: 0, vy: 0 },
-        { mass, x: r, y: 0, vx: 0, vy: -v }
+        {mass, x: -r, y: 0, vx: 0, vy: v},
+        {mass, x: 0, y: 0, vx: 0, vy: 0},
+        {mass, x: r, y: 0, vx: 0, vy: -v}
     ];
 
     if (!clockwise) {
@@ -161,154 +135,76 @@ function buildEulerCollinearPreset({ r = 1, mass = 1, clockwise = false }) {
     }));
 }
 
-const ORBIT_PRESETS = [
-    // ===== ВОСЬМЁРКА =====
-    {
-        id: 'figure-eight',
-        name: 'Восьмёрка',
-        description: 'Классическая хореография трёх одинаковых тел. Все тела проходят одну и ту же траекторию в форме восьмёрки.',
-        meta: 'Семейство: хореография · Камера: центр масс',
-        settings: { G: 1, dt: 0.002, scale: 160, timeScale: 1, trailLength: 500, cameraMode: 'com' },
-        bodies: PRESET_FIGURE_EIGHT
-    },
-    {
-        id: 'figure-eight-45',
-        name: 'Восьмёрка 45°',
-        description: 'Та же самая периодическая орбита, повернутая на 45°. Визуально выглядит гораздо динамичнее.',
-        meta: 'Семейство: хореография · Поворот: 45°',
-        settings: { G: 1, dt: 0.002, scale: 155, timeScale: 1, trailLength: 500, cameraMode: 'com' },
-        bodies: transformBodiesForScaleAndRotation(PRESET_FIGURE_EIGHT, {
-            scale: 1,
-            rotation: Math.PI / 4
-        })
-    },
-    {
-        id: 'figure-eight-large',
-        name: 'Большая восьмёрка',
-        description: 'Масштабированная версия классической восьмёрки. Движение более плавное, а рисунок на экране получается крупнее.',
-        meta: 'Семейство: хореография · Масштаб: 2.0',
-        settings: { G: 1, dt: 0.003, scale: 105, timeScale: 1, trailLength: 700, cameraMode: 'com' },
-        bodies: transformBodiesForScaleAndRotation(PRESET_FIGURE_EIGHT, {
-            scale: 2.0,
-            rotation: 0
-        })
-    },
-    {
-        id: 'figure-eight-large-diagonal',
-        name: 'Большая диагональная восьмёрка',
-        description: 'Увеличенная и повернутая версия восьмёрки. Один из самых красивых вариантов для демонстрации.',
-        meta: 'Семейство: хореография · Масштаб: 2.3 · Поворот: 30°',
-        settings: { G: 1, dt: 0.003, scale: 95, timeScale: 1, trailLength: 800, cameraMode: 'com' },
-        bodies: transformBodiesForScaleAndRotation(PRESET_FIGURE_EIGHT, {
-            scale: 2.3,
-            rotation: Math.PI / 6
-        })
-    },
-    {
-        id: 'figure-eight-body1',
-        name: 'Восьмёрка в системе тела 1',
-        description: 'Та же периодическая орбита, но центрирование идёт по телу 1. Относительные траектории двух других тел выглядят гораздо сложнее.',
-        meta: 'Семейство: хореография · Камера: тело 1',
-        settings: { G: 1, dt: 0.002, scale: 160, timeScale: 1, trailLength: 900, cameraMode: 'body0' },
-        bodies: PRESET_FIGURE_EIGHT
-    },
-    {
-        id: 'figure-eight-mirrored',
-        name: 'Зеркальная восьмёрка',
-        description: 'Отражённый вариант той же хореографии. Формально это тоже периодическое решение.',
-        meta: 'Семейство: хореография · Отражение по оси Y',
-        settings: { G: 1, dt: 0.002, scale: 160, timeScale: 1, trailLength: 500, cameraMode: 'com' },
-        bodies: mirrorBodiesY(PRESET_FIGURE_EIGHT)
-    },
+function loadOrbitPreset(preset) {
+    ui.gInput.value = preset.settings?.G ?? 1;
+    ui.dtInput.value = preset.settings?.dt ?? 0.002;
+    ui.scaleInput.value = preset.settings?.scale ?? 160;
+    ui.timeScaleInput.value = preset.settings?.timeScale ?? 1;
+    ui.trailLengthInput.value = preset.settings?.trailLength ?? 700;
 
-    // ===== ЛАГРАНЖ =====
-    {
-        id: 'lagrange-triangle',
-        name: 'Лагранж: равносторонний треугольник',
-        description: 'Три тела находятся в вершинах равностороннего треугольника и вращаются, сохраняя форму конфигурации.',
-        meta: 'Семейство: центральная конфигурация Лагранжа · Камера: центр масс',
-        settings: { G: 1, dt: 0.002, scale: 140, timeScale: 1, trailLength: 450, cameraMode: 'com' },
-        bodies: buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false })
-    },
-    {
-        id: 'lagrange-triangle-30',
-        name: 'Лагранж 30°',
-        description: 'Треугольная орбита Лагранжа, повернутая на 30°. Хорошо смотрится как чистая периодическая конфигурация.',
-        meta: 'Семейство: Лагранж · Поворот: 30°',
-        settings: { G: 1, dt: 0.002, scale: 140, timeScale: 1, trailLength: 450, cameraMode: 'com' },
-        bodies: transformBodiesForScaleAndRotation(
-            buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false }),
-            { scale: 1, rotation: Math.PI / 6 }
-        )
-    },
-    {
-        id: 'lagrange-large',
-        name: 'Большой Лагранж',
-        description: 'Масштабированный треугольник Лагранжа. Движение медленнее, а картинка на экране — более внушительная.',
-        meta: 'Семейство: Лагранж · Масштаб: 2.2',
-        settings: { G: 1, dt: 0.003, scale: 90, timeScale: 1, trailLength: 600, cameraMode: 'com' },
-        bodies: transformBodiesForScaleAndRotation(
-            buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false }),
-            { scale: 2.2, rotation: 0 }
-        )
-    },
-    {
-        id: 'lagrange-body2',
-        name: 'Лагранж в системе тела 2',
-        description: 'Если центрировать по одному из тел, две остальные орбиты рисуют особенно красивые замкнутые кривые.',
-        meta: 'Семейство: Лагранж · Камера: тело 2',
-        settings: { G: 1, dt: 0.002, scale: 170, timeScale: 1, trailLength: 900, cameraMode: 'body1' },
-        bodies: buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false })
-    },
-    {
-        id: 'lagrange-reverse',
-        name: 'Лагранж в обратную сторону',
-        description: 'То же периодическое решение, но с обратным направлением вращения.',
-        meta: 'Семейство: Лагранж · Обращение времени',
-        settings: { G: 1, dt: 0.002, scale: 140, timeScale: 1, trailLength: 450, cameraMode: 'com' },
-        bodies: buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: true })
-    },
-
-    // ===== ЭЙЛЕР =====
-    {
-        id: 'euler-collinear',
-        name: 'Эйлер: коллинеарная орбита',
-        description: 'Тела расположены на одной прямой и вращаются, сохраняя коллинеарную структуру относительно центра масс.',
-        meta: 'Семейство: центральная конфигурация Эйлера · Камера: центр масс',
-        settings: { G: 1, dt: 0.001, scale: 180, timeScale: 1, trailLength: 500, cameraMode: 'com' },
-        bodies: buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false })
-    },
-    {
-        id: 'euler-collinear-90',
-        name: 'Эйлер 90°',
-        description: 'Коллинеарная конфигурация Эйлера, повернутая на 90°.',
-        meta: 'Семейство: Эйлер · Поворот: 90°',
-        settings: { G: 1, dt: 0.001, scale: 180, timeScale: 1, trailLength: 500, cameraMode: 'com' },
-        bodies: transformBodiesForScaleAndRotation(
-            buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false }),
-            { scale: 1, rotation: Math.PI / 2 }
-        )
-    },
-    {
-        id: 'euler-large',
-        name: 'Большой Эйлер',
-        description: 'Масштабированная версия коллинеарного периодического решения.',
-        meta: 'Семейство: Эйлер · Масштаб: 2.0',
-        settings: { G: 1, dt: 0.0015, scale: 110, timeScale: 1, trailLength: 700, cameraMode: 'com' },
-        bodies: transformBodiesForScaleAndRotation(
-            buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false }),
-            { scale: 2.0, rotation: 0 }
-        )
-    },
-    {
-        id: 'euler-body3',
-        name: 'Эйлер в системе тела 3',
-        description: 'Если центрировать по телу 3, две оставшиеся траектории дают очень выразительный относительный рисунок.',
-        meta: 'Семейство: Эйлер · Камера: тело 3',
-        settings: { G: 1, dt: 0.001, scale: 220, timeScale: 1, trailLength: 1000, cameraMode: 'body2' },
-        bodies: buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false })
+    if (preset.settings?.cameraMode) {
+        ui.cameraModeInput.value = preset.settings.cameraMode;
     }
-];
+
+    initialBodies = preset.bodies.map((body, index) => createInitialBodyConfig(body, index));
+    writeBodyInputsFromInitial();
+    applyGlobalSettings();
+    resetSimulation();
+    closeOrbitsModal();
+}
+
+function renderOrbitPresets() {
+    ui.orbitList.innerHTML = '';
+
+    if (!orbitPresets.length) {
+        ui.orbitList.innerHTML = '<p>Каталог орбит пуст.</p>';
+        return;
+    }
+
+    const groups = new Map();
+
+    for (const preset of orbitPresets) {
+        const family = preset.family || 'Без категории';
+
+        if (!groups.has(family)) {
+            groups.set(family, []);
+        }
+
+        groups.get(family).push(preset);
+    }
+
+    for (const [family, presets] of groups.entries()) {
+        const group = document.createElement('div');
+        group.className = 'orbit-group';
+
+        const title = document.createElement('h3');
+        title.className = 'orbit-group-title';
+        title.textContent = family;
+        group.appendChild(title);
+
+        for (const preset of presets) {
+            const card = document.createElement('div');
+            card.className = 'orbit-card';
+
+            const sourceBlock = preset.source
+                ? `<div class="orbit-source">Источник: ${preset.source}</div>`
+                : '';
+
+            card.innerHTML = `
+    <h3>${preset.name}</h3>
+    <p>${preset.description}</p>
+    <div class="orbit-meta">${preset.meta || ''}</div>
+`;
+
+            const btn = card.querySelector('button');
+            btn.addEventListener('click', () => loadOrbitPreset(preset));
+
+            group.appendChild(card);
+        }
+
+        ui.orbitList.appendChild(group);
+    }
+}
 
 const drag = {
     active: false,
@@ -369,53 +265,14 @@ function createInitialBodyConfig(raw, index) {
 }
 
 function loadPresetFigureEight() {
-    ui.gInput.value = 1;
-    ui.dtInput.value = 0.002;
-    ui.scaleInput.value = 160;
+    const preset = getOrbitPresetById('figure-eight');
 
-    initialBodies = PRESET_FIGURE_EIGHT.map((body, index) => createInitialBodyConfig(body, index));
-    writeBodyInputsFromInitial();
-    applyGlobalSettings();
-    resetSimulation();
-}
-
-function loadOrbitPreset(preset) {
-    ui.gInput.value = preset.settings?.G ?? 1;
-    ui.dtInput.value = preset.settings?.dt ?? 0.002;
-    ui.scaleInput.value = preset.settings?.scale ?? 160;
-    ui.timeScaleInput.value = preset.settings?.timeScale ?? 1;
-    ui.trailLengthInput.value = preset.settings?.trailLength ?? 400;
-
-    if (preset.settings?.cameraMode) {
-        ui.cameraModeInput.value = preset.settings.cameraMode;
+    if (!preset) {
+        console.error('Пресет figure-eight не найден в orbitCatalog.js');
+        return;
     }
 
-    initialBodies = preset.bodies.map((body, index) => createInitialBodyConfig(body, index));
-    writeBodyInputsFromInitial();
-    applyGlobalSettings();
-    resetSimulation();
-    closeOrbitsModal();
-}
-
-function renderOrbitPresets() {
-    ui.orbitList.innerHTML = '';
-
-    ORBIT_PRESETS.forEach(preset => {
-        const card = document.createElement('div');
-        card.className = 'orbit-card';
-
-        card.innerHTML = `
-            <h3>${preset.name}</h3>
-            <p>${preset.description}</p>
-            <div class="orbit-meta">${preset.meta}</div>
-            <button type="button">Загрузить</button>
-        `;
-
-        const btn = card.querySelector('button');
-        btn.addEventListener('click', () => loadOrbitPreset(preset));
-
-        ui.orbitList.appendChild(card);
-    });
+    loadOrbitPreset(preset);
 }
 
 function mirrorBodiesX(bodies) {
@@ -483,13 +340,13 @@ function createSimulationBody(initial, index) {
         vy: initial.vy,
         ax: 0,
         ay: 0,
-        trail: [{ x: initial.x, y: initial.y }],
+        trail: [{x: initial.x, y: initial.y}],
         trailTick: 0
     };
 }
 
 function computeAccelerations(sourceBodies) {
-    const acc = sourceBodies.map(() => ({ ax: 0, ay: 0 }));
+    const acc = sourceBodies.map(() => ({ax: 0, ay: 0}));
     const eps2 = state.softening * state.softening;
 
     for (let i = 0; i < sourceBodies.length; i++) {
@@ -583,23 +440,23 @@ function setSelectedBody(index) {
 
 function getCameraCenter(sourceBodies = (bodies.length ? bodies : initialBodies)) {
     if (!sourceBodies.length) {
-        return { x: 0, y: 0 };
+        return {x: 0, y: 0};
     }
 
     if (state.cameraMode === 'origin') {
-        return { x: 0, y: 0 };
+        return {x: 0, y: 0};
     }
 
     if (state.cameraMode === 'body0' && sourceBodies[0]) {
-        return { x: sourceBodies[0].x, y: sourceBodies[0].y };
+        return {x: sourceBodies[0].x, y: sourceBodies[0].y};
     }
 
     if (state.cameraMode === 'body1' && sourceBodies[1]) {
-        return { x: sourceBodies[1].x, y: sourceBodies[1].y };
+        return {x: sourceBodies[1].x, y: sourceBodies[1].y};
     }
 
     if (state.cameraMode === 'body2' && sourceBodies[2]) {
-        return { x: sourceBodies[2].x, y: sourceBodies[2].y };
+        return {x: sourceBodies[2].x, y: sourceBodies[2].y};
     }
 
     let totalMass = 0;
@@ -613,7 +470,7 @@ function getCameraCenter(sourceBodies = (bodies.length ? bodies : initialBodies)
     }
 
     if (totalMass === 0) {
-        return { x: 0, y: 0 };
+        return {x: 0, y: 0};
     }
 
     return {
@@ -881,7 +738,7 @@ function hasInvalidState() {
 }
 
 function physicsStep(dt) {
-    const prevAcc = bodies.map(body => ({ ax: body.ax, ay: body.ay }));
+    const prevAcc = bodies.map(body => ({ax: body.ax, ay: body.ay}));
 
     for (const body of bodies) {
         body.x += body.vx * dt + 0.5 * body.ax * dt * dt;
@@ -901,7 +758,7 @@ function physicsStep(dt) {
         body.trailTick += 1;
         if (body.trailTick >= state.trailSampleEvery) {
             body.trailTick = 0;
-            body.trail.push({ x: body.x, y: body.y });
+            body.trail.push({x: body.x, y: body.y});
 
             if (body.trail.length > state.trailMaxLength) {
                 body.trail.shift();
@@ -1096,7 +953,6 @@ function init() {
     ui.resetBtn.addEventListener('click', resetSimulation);
     ui.orbitsBtn.addEventListener('click', openOrbitsModal);
     ui.presetBtn.addEventListener('click', loadPresetFigureEight);
-
 
 
     canvas.addEventListener('pointerdown', startDrag);

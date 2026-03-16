@@ -147,3 +147,6 @@ const ORBIT_PRESETS = [
     }),
     */
 ];
+
+window.PRESET_FIGURE_EIGHT = PRESET_FIGURE_EIGHT;
+window.ORBIT_PRESETS = ORBIT_PRESETS;
