@@ -62,10 +62,16 @@
         Показывать векторы скорости
     </label>
 
-    <label class="checkbox">
-        <input id="centerOnMassInput" type="checkbox" checked />
-        Центрировать по центру масс
-    </label>
+    <div class="field">
+        <label for="cameraModeInput">Центрирование</label>
+        <select id="cameraModeInput">
+            <option value="origin">По началу координат</option>
+            <option value="com" selected>По центру масс</option>
+            <option value="body0">По телу 1</option>
+            <option value="body1">По телу 2</option>
+            <option value="body2">По телу 3</option>
+        </select>
+    </div>
 
     <div class="selector">
         <div class="selector-title">Тело для drag-редактирования</div>
@@ -156,6 +162,7 @@
         <button id="applyBtn" type="button">Применить и перезапустить</button>
         <button id="resetBtn" type="button">Перезапустить</button>
         <button id="presetBtn" type="button">Сбросить пример</button>
+        <button id="orbitsBtn" type="button">Орбиты</button>
         <button id="helpBtn" type="button">Справка</button>
     </div>
 
@@ -227,6 +234,27 @@
 
         <div class="modal-actions">
             <button id="helpOkBtn" type="button">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<div id="orbitsOverlay" class="modal-overlay hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="orbitsTitle">
+        <button id="orbitsCloseBtn" class="modal-close" type="button" aria-label="Закрыть">×</button>
+
+        <h2 id="orbitsTitle">Периодические орбиты</h2>
+
+        <div class="modal-content">
+            <p>
+                Ниже собраны несколько готовых периодических решений задачи трёх тел.
+                Нажми <b>«Загрузить»</b>, чтобы сразу подставить соответствующие начальные условия.
+            </p>
+
+            <div id="orbitList" class="orbit-list"></div>
+        </div>
+
+        <div class="modal-actions">
+            <button id="orbitsOkBtn" type="button">Закрыть</button>
         </div>
     </div>
 </div>
