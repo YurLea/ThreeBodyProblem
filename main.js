@@ -171,42 +171,12 @@ const ORBIT_PRESETS = [
         bodies: PRESET_FIGURE_EIGHT
     },
     {
-        id: 'figure-eight-rotated',
-        name: 'Восьмёрка (повёрнутая)',
-        description: 'Та же самая периодическая орбита, но повернутая на 90°.',
-        meta: 'Поворот базовой восьмёрки',
-        settings: { G: 1, dt: 0.002, scale: 160 },
-        bodies: transformBodiesForScaleAndRotation(PRESET_FIGURE_EIGHT, {
-            scale: 1,
-            rotation: Math.PI / 2
-        })
-    },
-    {
-        id: 'figure-eight-large',
-        name: 'Восьмёрка (увеличенная)',
-        description: 'Масштабная версия восьмёрки. Орбита остаётся периодической, но становится больше и медленнее.',
-        meta: 'Масштаб λ = 1.8',
-        settings: { G: 1, dt: 0.003, scale: 105 },
-        bodies: transformBodiesForScaleAndRotation(PRESET_FIGURE_EIGHT, {
-            scale: 1.8,
-            rotation: 0
-        })
-    },
-    {
         id: 'lagrange-triangle',
         name: 'Лагранж: равносторонний треугольник',
         description: 'Три одинаковые массы находятся в вершинах равностороннего треугольника и равномерно вращаются как жёсткая конфигурация.',
         meta: 'Центральная конфигурация Лагранжа',
         settings: { G: 1, dt: 0.002, scale: 140 },
         bodies: buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false })
-    },
-    {
-        id: 'lagrange-triangle-large',
-        name: 'Лагранж (больший масштаб)',
-        description: 'Та же треугольная периодическая конфигурация, но в увеличенном масштабе.',
-        meta: 'Масштабированный вариант',
-        settings: { G: 1, dt: 0.003, scale: 100 },
-        bodies: buildLagrangeTrianglePreset({ side: 3.2, mass: 1, clockwise: false })
     },
     {
         id: 'euler-collinear',
@@ -219,40 +189,24 @@ const ORBIT_PRESETS = [
 
     {
         id: 'butterfly-i',
-        name: 'Butterfly I',
+        name: 'Butterfly',
         description: 'Периодическая хореография трёх одинаковых тел из семейства Butterfly.',
         meta: 'Šuvakov–Dmitrašinović, 2013',
         settings: { G: 1, dt: 0.0005, scale: 220, trailLength: 1200 },
         bodies: buildSuvakovOrbit({ vx: 0.30689, vy: 0.12551 })
     },
     {
-        id: 'butterfly-ii',
-        name: 'Butterfly II',
-        description: 'Вторая периодическая орбита из семейства Butterfly.',
-        meta: 'Šuvakov–Dmitrašinović, 2013',
-        settings: { G: 1, dt: 0.0005, scale: 200, trailLength: 1200 },
-        bodies: buildSuvakovOrbit({ vx: 0.39295, vy: 0.09758 })
-    },
-    {
         id: 'moth-i',
-        name: 'Moth I',
+        name: 'Moth',
         description: 'Периодическая хореография из семейства Moth.',
         meta: 'Šuvakov–Dmitrašinović, 2013',
         settings: { G: 1, dt: 0.0005, scale: 180, trailLength: 1200 },
         bodies: buildSuvakovOrbit({ vx: 0.46444, vy: 0.39606 })
     },
     {
-        id: 'moth-ii',
-        name: 'Moth II',
-        description: 'Вторая периодическая орбита из семейства Moth.',
-        meta: 'Šuvakov–Dmitrašinović, 2013',
-        settings: { G: 1, dt: 0.0005, scale: 170, trailLength: 1500 },
-        bodies: buildSuvakovOrbit({ vx: 0.43917, vy: 0.45297 })
-    },
-    {
         id: 'dragonfly',
         name: 'Dragonfly',
-        description: 'Очень красивая и сложная периодическая хореография.',
+        description: 'Сложная периодическая хореография.',
         meta: 'Šuvakov–Dmitrašinović, 2013',
         settings: { G: 1, dt: 0.0005, scale: 200, trailLength: 1500 },
         bodies: buildSuvakovOrbit({ vx: 0.08058, vy: 0.58884 })
@@ -260,18 +214,10 @@ const ORBIT_PRESETS = [
     {
         id: 'goggles',
         name: 'Goggles',
-        description: 'Периодическая орбита в форме очков.',
+        description: 'Периодическая орбита',
         meta: 'Šuvakov–Dmitrašinović, 2013',
         settings: { G: 1, dt: 0.0005, scale: 240, trailLength: 1200 },
         bodies: buildSuvakovOrbit({ vx: 0.08330, vy: 0.12789 })
-    },
-    {
-        id: 'bumblebee',
-        name: 'Bumblebee',
-        description: 'Очень длинная и сложная периодическая орбита.',
-        meta: 'Šuvakov–Dmitrašinović, 2013',
-        settings: { G: 1, dt: 0.0005, scale: 140, trailLength: 2500 },
-        bodies: buildSuvakovOrbit({ vx: 0.18428, vy: 0.58719 })
     },
     {
         id: 'yarn',
@@ -280,14 +226,6 @@ const ORBIT_PRESETS = [
         meta: 'Šuvakov–Dmitrašinović, 2013',
         settings: { G: 1, dt: 0.0005, scale: 160, trailLength: 2500 },
         bodies: buildSuvakovOrbit({ vx: 0.55906, vy: 0.34919 })
-    },
-    {
-        id: 'yin-yang-i',
-        name: 'Yin-Yang I',
-        description: 'Периодическая орбита из семейства Yin-Yang.',
-        meta: 'Šuvakov–Dmitrašinović, 2013',
-        settings: { G: 1, dt: 0.0005, scale: 180, trailLength: 1500 },
-        bodies: buildSuvakovOrbit({ vx: 0.51394, vy: 0.30474 })
     }
 ];
 
