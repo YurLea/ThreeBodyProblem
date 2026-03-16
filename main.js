@@ -162,58 +162,150 @@ function buildEulerCollinearPreset({ r = 1, mass = 1, clockwise = false }) {
 }
 
 const ORBIT_PRESETS = [
+    // ===== ВОСЬМЁРКА =====
     {
         id: 'figure-eight',
         name: 'Восьмёрка',
-        description: 'Классическая хореография трёх одинаковых тел: все три движутся по одной и той же кривой в форме восьмёрки.',
-        meta: '3 одинаковые массы, G = 1',
-        settings: { G: 1, dt: 0.002, scale: 160 },
+        description: 'Классическая хореография трёх одинаковых тел. Все тела проходят одну и ту же траекторию в форме восьмёрки.',
+        meta: 'Семейство: хореография · Камера: центр масс',
+        settings: { G: 1, dt: 0.002, scale: 160, timeScale: 1, trailLength: 500, cameraMode: 'com' },
         bodies: PRESET_FIGURE_EIGHT
     },
     {
-        id: 'figure-eight-rotated',
-        name: 'Восьмёрка (повёрнутая)',
-        description: 'Та же самая периодическая орбита, но повернутая на 90°.',
-        meta: 'Поворот базовой восьмёрки',
-        settings: { G: 1, dt: 0.002, scale: 160 },
+        id: 'figure-eight-45',
+        name: 'Восьмёрка 45°',
+        description: 'Та же самая периодическая орбита, повернутая на 45°. Визуально выглядит гораздо динамичнее.',
+        meta: 'Семейство: хореография · Поворот: 45°',
+        settings: { G: 1, dt: 0.002, scale: 155, timeScale: 1, trailLength: 500, cameraMode: 'com' },
         bodies: transformBodiesForScaleAndRotation(PRESET_FIGURE_EIGHT, {
             scale: 1,
-            rotation: Math.PI / 2
+            rotation: Math.PI / 4
         })
     },
     {
         id: 'figure-eight-large',
-        name: 'Восьмёрка (увеличенная)',
-        description: 'Масштабная версия восьмёрки. Орбита остаётся периодической, но становится больше и медленнее.',
-        meta: 'Масштаб λ = 1.8',
-        settings: { G: 1, dt: 0.003, scale: 105 },
+        name: 'Большая восьмёрка',
+        description: 'Масштабированная версия классической восьмёрки. Движение более плавное, а рисунок на экране получается крупнее.',
+        meta: 'Семейство: хореография · Масштаб: 2.0',
+        settings: { G: 1, dt: 0.003, scale: 105, timeScale: 1, trailLength: 700, cameraMode: 'com' },
         bodies: transformBodiesForScaleAndRotation(PRESET_FIGURE_EIGHT, {
-            scale: 1.8,
+            scale: 2.0,
             rotation: 0
         })
     },
     {
+        id: 'figure-eight-large-diagonal',
+        name: 'Большая диагональная восьмёрка',
+        description: 'Увеличенная и повернутая версия восьмёрки. Один из самых красивых вариантов для демонстрации.',
+        meta: 'Семейство: хореография · Масштаб: 2.3 · Поворот: 30°',
+        settings: { G: 1, dt: 0.003, scale: 95, timeScale: 1, trailLength: 800, cameraMode: 'com' },
+        bodies: transformBodiesForScaleAndRotation(PRESET_FIGURE_EIGHT, {
+            scale: 2.3,
+            rotation: Math.PI / 6
+        })
+    },
+    {
+        id: 'figure-eight-body1',
+        name: 'Восьмёрка в системе тела 1',
+        description: 'Та же периодическая орбита, но центрирование идёт по телу 1. Относительные траектории двух других тел выглядят гораздо сложнее.',
+        meta: 'Семейство: хореография · Камера: тело 1',
+        settings: { G: 1, dt: 0.002, scale: 160, timeScale: 1, trailLength: 900, cameraMode: 'body0' },
+        bodies: PRESET_FIGURE_EIGHT
+    },
+    {
+        id: 'figure-eight-mirrored',
+        name: 'Зеркальная восьмёрка',
+        description: 'Отражённый вариант той же хореографии. Формально это тоже периодическое решение.',
+        meta: 'Семейство: хореография · Отражение по оси Y',
+        settings: { G: 1, dt: 0.002, scale: 160, timeScale: 1, trailLength: 500, cameraMode: 'com' },
+        bodies: mirrorBodiesY(PRESET_FIGURE_EIGHT)
+    },
+
+    // ===== ЛАГРАНЖ =====
+    {
         id: 'lagrange-triangle',
         name: 'Лагранж: равносторонний треугольник',
-        description: 'Три одинаковые массы находятся в вершинах равностороннего треугольника и равномерно вращаются как жёсткая конфигурация.',
-        meta: 'Центральная конфигурация Лагранжа',
-        settings: { G: 1, dt: 0.002, scale: 140 },
+        description: 'Три тела находятся в вершинах равностороннего треугольника и вращаются, сохраняя форму конфигурации.',
+        meta: 'Семейство: центральная конфигурация Лагранжа · Камера: центр масс',
+        settings: { G: 1, dt: 0.002, scale: 140, timeScale: 1, trailLength: 450, cameraMode: 'com' },
         bodies: buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false })
     },
     {
-        id: 'lagrange-triangle-large',
-        name: 'Лагранж (больший масштаб)',
-        description: 'Та же треугольная периодическая конфигурация, но в увеличенном масштабе.',
-        meta: 'Масштабированный вариант',
-        settings: { G: 1, dt: 0.003, scale: 100 },
-        bodies: buildLagrangeTrianglePreset({ side: 3.2, mass: 1, clockwise: false })
+        id: 'lagrange-triangle-30',
+        name: 'Лагранж 30°',
+        description: 'Треугольная орбита Лагранжа, повернутая на 30°. Хорошо смотрится как чистая периодическая конфигурация.',
+        meta: 'Семейство: Лагранж · Поворот: 30°',
+        settings: { G: 1, dt: 0.002, scale: 140, timeScale: 1, trailLength: 450, cameraMode: 'com' },
+        bodies: transformBodiesForScaleAndRotation(
+            buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false }),
+            { scale: 1, rotation: Math.PI / 6 }
+        )
     },
+    {
+        id: 'lagrange-large',
+        name: 'Большой Лагранж',
+        description: 'Масштабированный треугольник Лагранжа. Движение медленнее, а картинка на экране — более внушительная.',
+        meta: 'Семейство: Лагранж · Масштаб: 2.2',
+        settings: { G: 1, dt: 0.003, scale: 90, timeScale: 1, trailLength: 600, cameraMode: 'com' },
+        bodies: transformBodiesForScaleAndRotation(
+            buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false }),
+            { scale: 2.2, rotation: 0 }
+        )
+    },
+    {
+        id: 'lagrange-body2',
+        name: 'Лагранж в системе тела 2',
+        description: 'Если центрировать по одному из тел, две остальные орбиты рисуют особенно красивые замкнутые кривые.',
+        meta: 'Семейство: Лагранж · Камера: тело 2',
+        settings: { G: 1, dt: 0.002, scale: 170, timeScale: 1, trailLength: 900, cameraMode: 'body1' },
+        bodies: buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false })
+    },
+    {
+        id: 'lagrange-reverse',
+        name: 'Лагранж в обратную сторону',
+        description: 'То же периодическое решение, но с обратным направлением вращения.',
+        meta: 'Семейство: Лагранж · Обращение времени',
+        settings: { G: 1, dt: 0.002, scale: 140, timeScale: 1, trailLength: 450, cameraMode: 'com' },
+        bodies: buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: true })
+    },
+
+    // ===== ЭЙЛЕР =====
     {
         id: 'euler-collinear',
         name: 'Эйлер: коллинеарная орбита',
-        description: 'Тела лежат на одной прямой и периодически вращаются, сохраняя коллинеарность относительно центра масс.',
-        meta: 'Коллинеарная центральная конфигурация',
-        settings: { G: 1, dt: 0.001, scale: 180 },
+        description: 'Тела расположены на одной прямой и вращаются, сохраняя коллинеарную структуру относительно центра масс.',
+        meta: 'Семейство: центральная конфигурация Эйлера · Камера: центр масс',
+        settings: { G: 1, dt: 0.001, scale: 180, timeScale: 1, trailLength: 500, cameraMode: 'com' },
+        bodies: buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false })
+    },
+    {
+        id: 'euler-collinear-90',
+        name: 'Эйлер 90°',
+        description: 'Коллинеарная конфигурация Эйлера, повернутая на 90°.',
+        meta: 'Семейство: Эйлер · Поворот: 90°',
+        settings: { G: 1, dt: 0.001, scale: 180, timeScale: 1, trailLength: 500, cameraMode: 'com' },
+        bodies: transformBodiesForScaleAndRotation(
+            buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false }),
+            { scale: 1, rotation: Math.PI / 2 }
+        )
+    },
+    {
+        id: 'euler-large',
+        name: 'Большой Эйлер',
+        description: 'Масштабированная версия коллинеарного периодического решения.',
+        meta: 'Семейство: Эйлер · Масштаб: 2.0',
+        settings: { G: 1, dt: 0.0015, scale: 110, timeScale: 1, trailLength: 700, cameraMode: 'com' },
+        bodies: transformBodiesForScaleAndRotation(
+            buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false }),
+            { scale: 2.0, rotation: 0 }
+        )
+    },
+    {
+        id: 'euler-body3',
+        name: 'Эйлер в системе тела 3',
+        description: 'Если центрировать по телу 3, две оставшиеся траектории дают очень выразительный относительный рисунок.',
+        meta: 'Семейство: Эйлер · Камера: тело 3',
+        settings: { G: 1, dt: 0.001, scale: 220, timeScale: 1, trailLength: 1000, cameraMode: 'body2' },
         bodies: buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false })
     }
 ];
@@ -288,9 +380,15 @@ function loadPresetFigureEight() {
 }
 
 function loadOrbitPreset(preset) {
-    ui.gInput.value = preset.settings.G;
-    ui.dtInput.value = preset.settings.dt;
-    ui.scaleInput.value = preset.settings.scale;
+    ui.gInput.value = preset.settings?.G ?? 1;
+    ui.dtInput.value = preset.settings?.dt ?? 0.002;
+    ui.scaleInput.value = preset.settings?.scale ?? 160;
+    ui.timeScaleInput.value = preset.settings?.timeScale ?? 1;
+    ui.trailLengthInput.value = preset.settings?.trailLength ?? 400;
+
+    if (preset.settings?.cameraMode) {
+        ui.cameraModeInput.value = preset.settings.cameraMode;
+    }
 
     initialBodies = preset.bodies.map((body, index) => createInitialBodyConfig(body, index));
     writeBodyInputsFromInitial();
@@ -318,6 +416,36 @@ function renderOrbitPresets() {
 
         ui.orbitList.appendChild(card);
     });
+}
+
+function mirrorBodiesX(bodies) {
+    return bodies.map(body => ({
+        mass: body.mass,
+        x: body.x,
+        y: -body.y,
+        vx: body.vx,
+        vy: -body.vy
+    }));
+}
+
+function mirrorBodiesY(bodies) {
+    return bodies.map(body => ({
+        mass: body.mass,
+        x: -body.x,
+        y: body.y,
+        vx: -body.vx,
+        vy: body.vy
+    }));
+}
+
+function reverseVelocities(bodies) {
+    return bodies.map(body => ({
+        mass: body.mass,
+        x: body.x,
+        y: body.y,
+        vx: -body.vx,
+        vy: -body.vy
+    }));
 }
 
 function writeBodyInputsFromInitial() {
