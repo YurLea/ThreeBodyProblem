@@ -294,3 +294,51 @@ button.secondary.active {
 .modal::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.28);
 }
+
+.field select {
+    width: 140px;
+    padding: 7px 9px;
+    border-radius: 8px;
+    border: 1px solid #2c3a61;
+    background: #0f1730;
+    color: #eef3ff;
+    outline: none;
+}
+
+.orbit-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.orbit-card {
+    padding: 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.orbit-card h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #ffffff;
+}
+
+.orbit-card p {
+    margin: 0 0 10px;
+}
+
+.orbit-meta {
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #b8c5e3;
+}
+
+.orbit-card button {
+    background: #2d63ff;
+}
+
+.orbit-card button:hover {
+    background: #4475ff;
+}
