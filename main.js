@@ -161,13 +161,15 @@ function buildEulerCollinearPreset({ r = 1, mass = 1, clockwise = false }) {
     }));
 }
 
+const EXAMPLE_DT = 0.0000001
+
 const ORBIT_PRESETS = [
     {
         id: 'figure-eight',
         name: 'Восьмёрка',
         description: 'Классическая хореография трёх одинаковых тел: все три движутся по одной и той же кривой в форме восьмёрки.',
         meta: '3 одинаковые массы, G = 1',
-        settings: { G: 1, dt: 0.002, scale: 160 },
+        settings: { G: 1, dt: EXAMPLE_DT, scale: 160 },
         bodies: PRESET_FIGURE_EIGHT
     },
     {
@@ -175,7 +177,7 @@ const ORBIT_PRESETS = [
         name: 'Лагранж: равносторонний треугольник',
         description: 'Три одинаковые массы находятся в вершинах равностороннего треугольника и равномерно вращаются как жёсткая конфигурация.',
         meta: 'Центральная конфигурация Лагранжа',
-        settings: { G: 1, dt: 0.002, scale: 140 },
+        settings: { G: 1, dt: EXAMPLE_DT, scale: 140 },
         bodies: buildLagrangeTrianglePreset({ side: 2, mass: 1, clockwise: false })
     },
     {
@@ -183,7 +185,7 @@ const ORBIT_PRESETS = [
         name: 'Эйлер: коллинеарная орбита',
         description: 'Тела лежат на одной прямой и периодически вращаются, сохраняя коллинеарность относительно центра масс.',
         meta: 'Коллинеарная центральная конфигурация',
-        settings: { G: 1, dt: 0.001, scale: 180 },
+        settings: { G: 1, dt: EXAMPLE_DT, scale: 180 },
         bodies: buildEulerCollinearPreset({ r: 1, mass: 1, clockwise: false })
     },
 
@@ -192,7 +194,7 @@ const ORBIT_PRESETS = [
         name: 'Butterfly',
         description: 'Периодическая хореография трёх одинаковых тел из семейства Butterfly.',
         meta: 'Šuvakov–Dmitrašinović, 2013',
-        settings: { G: 1, dt: 0.0005, scale: 220, trailLength: 1200 },
+        settings: { G: 1, dt: EXAMPLE_DT, scale: 220, trailLength: 1200 },
         bodies: buildSuvakovOrbit({ vx: 0.30689, vy: 0.12551 })
     },
     {
@@ -200,7 +202,7 @@ const ORBIT_PRESETS = [
         name: 'Moth',
         description: 'Периодическая хореография из семейства Moth.',
         meta: 'Šuvakov–Dmitrašinović, 2013',
-        settings: { G: 1, dt: 0.0005, scale: 180, trailLength: 1200 },
+        settings: { G: 1, dt: EXAMPLE_DT, scale: 180, trailLength: 1200 },
         bodies: buildSuvakovOrbit({ vx: 0.46444, vy: 0.39606 })
     },
     {
@@ -208,7 +210,7 @@ const ORBIT_PRESETS = [
         name: 'Dragonfly',
         description: 'Сложная периодическая хореография.',
         meta: 'Šuvakov–Dmitrašinović, 2013',
-        settings: { G: 1, dt: 0.0005, scale: 200, trailLength: 1500 },
+        settings: { G: 1, dt: EXAMPLE_DT, scale: 200, trailLength: 1500 },
         bodies: buildSuvakovOrbit({ vx: 0.08058, vy: 0.58884 })
     },
     {
@@ -216,7 +218,7 @@ const ORBIT_PRESETS = [
         name: 'Goggles',
         description: 'Периодическая орбита',
         meta: 'Šuvakov–Dmitrašinović, 2013',
-        settings: { G: 1, dt: 0.0005, scale: 240, trailLength: 1200 },
+        settings: { G: 1, dt: EXAMPLE_DT, scale: 240, trailLength: 1200 },
         bodies: buildSuvakovOrbit({ vx: 0.08330, vy: 0.12789 })
     },
     {
@@ -224,7 +226,7 @@ const ORBIT_PRESETS = [
         name: 'Yarn',
         description: 'Сложная запутанная периодическая орбита.',
         meta: 'Šuvakov–Dmitrašinović, 2013',
-        settings: { G: 1, dt: 0.0005, scale: 160, trailLength: 2500 },
+        settings: { G: 1, dt: EXAMPLE_DT, scale: 160, trailLength: 2500 },
         bodies: buildSuvakovOrbit({ vx: 0.55906, vy: 0.34919 })
     }
 ];
